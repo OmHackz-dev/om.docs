@@ -4,17 +4,236 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Om's Docs</title>
-
-<!-- React Icons via CDN (Ionicons for retro-friendly icons) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-
-<!-- PDF.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <style>
-/* ===== OMHACKZ RETRO SYSTEM ===== */
 *, *::before, *::after { box-sizing: border-box; }
 
+/* ===== LOADING SCREEN ===== */
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  background: #0a0a1a;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: "Courier New", monospace;
+  color: #00ff88;
+  overflow: hidden;
+}
+
+#loading-screen .scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.15) 2px,
+    rgba(0,0,0,0.15) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+#loading-screen .noise {
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+.load-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  width: 400px;
+  max-width: 90vw;
+}
+
+.load-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.load-logo .logo-icon-wrap {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+/* Animated file shuffle */
+.file-shuffle {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.shuffle-file {
+  position: absolute;
+  width: 38px;
+  height: 48px;
+  background: #1a1a3e;
+  border: 2px solid #00ff88;
+  border-radius: 2px 8px 2px 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+.shuffle-file::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
+  background: #0a0a1a;
+  border-left: 2px solid #00ff88;
+  border-bottom: 2px solid #00ff88;
+  border-radius: 0 0 0 4px;
+}
+.shuffle-file:nth-child(1) {
+  top: 0; left: 0;
+  border-color: #00ff88;
+  animation: shuffleA 1.8s ease-in-out infinite;
+}
+.shuffle-file:nth-child(2) {
+  top: 8px; left: 14px;
+  border-color: #0088ff;
+  animation: shuffleB 1.8s ease-in-out infinite;
+  z-index: 1;
+}
+.shuffle-file:nth-child(3) {
+  top: 16px; left: 28px;
+  border-color: #ff4488;
+  animation: shuffleC 1.8s ease-in-out infinite;
+  z-index: 2;
+}
+
+@keyframes shuffleA {
+  0%   { transform: translate(0,0) rotate(0deg); opacity:1; }
+  33%  { transform: translate(6px,-10px) rotate(-8deg); opacity:1; }
+  66%  { transform: translate(30px,-5px) rotate(5deg); opacity:0.6; }
+  100% { transform: translate(0,0) rotate(0deg); opacity:1; }
+}
+@keyframes shuffleB {
+  0%   { transform: translate(0,0) rotate(0deg); z-index:1; }
+  33%  { transform: translate(-5px,-8px) rotate(5deg); }
+  66%  { transform: translate(10px,-15px) rotate(-10deg); }
+  100% { transform: translate(0,0) rotate(0deg); }
+}
+@keyframes shuffleC {
+  0%   { transform: translate(0,0) rotate(0deg); }
+  33%  { transform: translate(10px,5px) rotate(12deg); opacity:1; }
+  66%  { transform: translate(-10px,-10px) rotate(-5deg); opacity:0.7; }
+  100% { transform: translate(0,0) rotate(0deg); }
+}
+
+.load-logo h1 {
+  font-size: 22px;
+  color: #00ff88;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin: 0;
+  text-shadow: 0 0 20px rgba(0,255,136,0.5);
+}
+.load-logo span {
+  font-size: 10px;
+  color: #005533;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.load-progress-wrap {
+  width: 100%;
+}
+.load-progress-bar-outer {
+  width: 100%;
+  height: 4px;
+  background: #111133;
+  border: 1px solid #003322;
+  position: relative;
+  overflow: hidden;
+}
+.load-progress-bar-inner {
+  height: 100%;
+  background: linear-gradient(90deg, #00cc66, #00ff88);
+  width: 0%;
+  transition: width 0.4s ease;
+  box-shadow: 0 0 8px rgba(0,255,136,0.8);
+}
+.load-progress-bar-outer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 70%, rgba(0,255,136,0.3));
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.load-status-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.load-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #003322;
+  transition: color 0.3s;
+}
+.load-step.done   { color: #00ff88; }
+.load-step.active { color: #00ffaa; animation: blink 0.8s step-end infinite; }
+.load-step.error  { color: #ff4444; }
+
+@keyframes blink {
+  0%, 100% { opacity:1; }
+  50% { opacity:0.5; }
+}
+
+.load-step .step-icon { width: 14px; text-align: center; font-size: 10px; }
+.load-step .step-icon.spin { animation: spin 1s linear infinite; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+.load-pct {
+  font-size: 11px;
+  color: #005533;
+  text-align: right;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
+.load-corner {
+  position: absolute;
+  font-size: 9px;
+  color: #002211;
+  letter-spacing: 1px;
+  font-family: "Courier New", monospace;
+}
+.load-corner.tl { top: 16px; left: 20px; }
+.load-corner.tr { top: 16px; right: 20px; }
+.load-corner.bl { bottom: 16px; left: 20px; }
+.load-corner.br { bottom: 16px; right: 20px; }
+
+/* ===== MAIN APP ===== */
 body {
   font-family: "Verdana", "Tahoma", sans-serif;
   background-color: #f4f4f4;
@@ -22,6 +241,9 @@ body {
   margin: 0;
   padding: 0;
 }
+
+#app { display: none; }
+#app.ready { display: block; }
 
 .container {
   width: 800px;
@@ -59,23 +281,14 @@ body {
 .site-nav a.active { font-weight: bold; border-bottom: 2px solid #000080; }
 .site-nav i { margin-right: 4px; }
 
-.section, .page {
-  margin-bottom: 20px;
-  padding: 10px;
-  border: 1px solid #ccc;
-}
+.section, .page { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; }
 
 h1 { font-size: 24px; margin-bottom: 10px; }
 h2 { font-size: 20px; margin-bottom: 10px; color: #000080; }
 h3 { font-size: 16px; }
 
 table { width: 100%; border-collapse: collapse; }
-table th, table td {
-  border: 1px solid #000;
-  padding: 6px;
-  text-align: left;
-  vertical-align: middle;
-}
+table th, table td { border: 1px solid #000; padding: 6px; text-align: left; vertical-align: middle; }
 table th { background-color: #e0e0e0; }
 table td i { margin-right: 5px; }
 
@@ -105,62 +318,31 @@ table td i { margin-right: 5px; }
   color: #555;
 }
 
-/* ===== PAGES ===== */
 .page { display: none; }
 .page.active { display: block; }
 
-/* ===== SEARCH BAR ===== */
-.search-bar {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 12px;
-  align-items: center;
-}
+.search-bar { display: flex; gap: 6px; margin-bottom: 12px; align-items: center; }
 .search-bar input {
-  flex: 1;
-  padding: 5px 8px;
-  border: 1px solid #000;
-  font-family: "Verdana", sans-serif;
-  font-size: 13px;
+  flex: 1; padding: 5px 8px; border: 1px solid #000;
+  font-family: "Verdana", sans-serif; font-size: 13px;
 }
 
-/* ===== FILE ICON ===== */
 .file-icon-pdf  { color: #cc0000; }
 .file-icon-word { color: #000080; }
 .file-icon-txt  { color: #555; }
 .file-icon-img  { color: #007700; }
 .file-icon-other{ color: #333; }
 
-/* ===== BADGE ===== */
-.badge {
-  display: inline-block;
-  padding: 1px 6px;
-  border: 1px solid #000;
-  font-size: 10px;
-  background: #e0e0e0;
-  text-transform: uppercase;
-}
+.badge { display: inline-block; padding: 1px 6px; border: 1px solid #000; font-size: 10px; background: #e0e0e0; text-transform: uppercase; }
 .badge-pdf  { background: #ffdddd; border-color: #cc0000; color: #cc0000; }
 .badge-word { background: #ddddff; border-color: #000080; color: #000080; }
 .badge-img  { background: #ddffdd; border-color: #007700; color: #007700; }
 
-/* ===== STATS ===== */
-.stats-row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-.stat-box {
-  flex: 1;
-  border: 1px solid #000;
-  padding: 8px 10px;
-  text-align: center;
-  background: #f9f9f9;
-}
+.stats-row { display: flex; gap: 10px; margin-bottom: 14px; }
+.stat-box { flex: 1; border: 1px solid #000; padding: 8px 10px; text-align: center; background: #f9f9f9; }
 .stat-box .stat-num { font-size: 22px; font-weight: bold; color: #000080; }
 .stat-box .stat-label { font-size: 11px; color: #555; margin-top: 2px; }
 
-/* ===== UPLOAD ZONE ===== */
 #drop-zone {
   border: 2px dashed #000;
   padding: 30px;
@@ -175,271 +357,129 @@ table td i { margin-right: 5px; }
 #drop-zone p { margin: 4px 0; font-size: 13px; color: #555; }
 #file-input { display: none; }
 
-/* ===== PROGRESS ===== */
-.progress-wrap {
-  display: none;
-  border: 1px solid #000;
-  height: 18px;
-  background: #e0e0e0;
-  margin: 8px 0;
-  position: relative;
-}
-.progress-bar {
-  height: 100%;
-  background: #000080;
-  width: 0%;
-  transition: width 0.3s;
-}
-.progress-label {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  text-align: center;
-  font-size: 11px;
-  line-height: 18px;
-  color: #fff;
-  mix-blend-mode: difference;
-}
+.progress-wrap { display: none; border: 1px solid #000; height: 18px; background: #e0e0e0; margin: 8px 0; position: relative; }
+.progress-bar { height: 100%; background: #000080; width: 0%; transition: width 0.3s; }
+.progress-label { position: absolute; top: 0; left: 0; right: 0; text-align: center; font-size: 11px; line-height: 18px; color: #fff; mix-blend-mode: difference; }
 
-/* ===== MODAL / VIEWER ===== */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  z-index: 9999;
-  justify-content: center;
-  align-items: center;
-}
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center; }
 .modal-overlay.open { display: flex; }
-
-.modal-box {
-  background: #fff;
-  border: 2px solid #000;
-  width: 90vw;
-  max-width: 860px;
-  height: 88vh;
-  display: flex;
-  flex-direction: column;
-  font-family: "Verdana", sans-serif;
-}
-
-.modal-titlebar {
-  background: #000080;
-  color: #fff;
-  padding: 6px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 13px;
-  font-weight: bold;
-  flex-shrink: 0;
-}
+.modal-box { background: #fff; border: 2px solid #000; width: 90vw; max-width: 860px; height: 88vh; display: flex; flex-direction: column; font-family: "Verdana", sans-serif; }
+.modal-titlebar { background: #000080; color: #fff; padding: 6px 10px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: bold; flex-shrink: 0; }
 .modal-titlebar i { margin-right: 6px; }
-.modal-titlebar .modal-close {
-  background: #cc0000;
-  border: 1px solid #fff;
-  color: #fff;
-  width: 20px;
-  height: 20px;
-  font-size: 12px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  font-family: "Verdana", sans-serif;
-  padding: 0;
-}
+.modal-titlebar .modal-close { background: #cc0000; border: 1px solid #fff; color: #fff; width: 20px; height: 20px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: "Verdana", sans-serif; padding: 0; }
+.modal-toolbar { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-bottom: 1px solid #000; background: #e8e8e8; flex-shrink: 0; flex-wrap: wrap; }
+.modal-toolbar .page-ctrl { display: flex; align-items: center; gap: 4px; font-size: 12px; }
+.modal-toolbar .page-ctrl input { width: 40px; border: 1px solid #000; font-family: "Verdana", sans-serif; font-size: 12px; padding: 2px 4px; text-align: center; }
+.modal-body { flex: 1; overflow: auto; background: #888; display: flex; flex-direction: column; align-items: center; padding: 10px; gap: 8px; }
+.modal-body canvas { background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.4); display: block; max-width: 100%; }
+.modal-body iframe { width: 100%; height: 100%; border: none; background: #fff; }
+.modal-img-wrap { display: flex; align-items: center; justify-content: center; min-height: 100%; }
+.modal-img-wrap img { max-width: 100%; max-height: 70vh; border: 1px solid #ccc; }
+.modal-txt-wrap { background: #fff; padding: 16px; width: 100%; font-family: "Courier New", monospace; font-size: 13px; white-space: pre-wrap; word-break: break-all; }
 
-.modal-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
-  border-bottom: 1px solid #000;
-  background: #e8e8e8;
-  flex-shrink: 0;
-  flex-wrap: wrap;
-}
-
-.modal-toolbar .page-ctrl {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-}
-.modal-toolbar .page-ctrl input {
-  width: 40px;
-  border: 1px solid #000;
-  font-family: "Verdana", sans-serif;
-  font-size: 12px;
-  padding: 2px 4px;
-  text-align: center;
-}
-
-.modal-body {
-  flex: 1;
-  overflow: auto;
-  background: #888;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px;
-  gap: 8px;
-}
-
-.modal-body canvas {
-  background: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-  display: block;
-  max-width: 100%;
-}
-
-.modal-body iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-  background: #fff;
-}
-
-.modal-img-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100%;
-}
-.modal-img-wrap img {
-  max-width: 100%;
-  max-height: 70vh;
-  border: 1px solid #ccc;
-}
-
-.modal-txt-wrap {
-  background: #fff;
-  padding: 16px;
-  width: 100%;
-  font-family: "Courier New", monospace;
-  font-size: 13px;
-  white-space: pre-wrap;
-  word-break: break-all;
-}
-
-/* ===== ABOUT PAGE ===== */
 .about-section p { font-size: 13px; line-height: 1.7; }
 .about-section ul { font-size: 13px; line-height: 2; padding-left: 20px; }
 .retro-hr { border: none; border-top: 2px solid #000; margin: 12px 0; }
 
-/* ===== TOAST ===== */
-#toast {
-  display: none;
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #000080;
-  color: #fff;
-  padding: 8px 18px;
-  border: 1px solid #000;
-  font-size: 13px;
-  z-index: 99999;
-  font-family: "Verdana", sans-serif;
-}
+#toast { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #000080; color: #fff; padding: 8px 18px; border: 1px solid #000; font-size: 13px; z-index: 99999; font-family: "Verdana", sans-serif; }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 840px) {
-  .container { width: 98%; }
-}
+@media (max-width: 840px) { .container { width: 98%; } }
 
-.empty-state {
-  text-align: center;
-  padding: 30px;
-  color: #555;
-  font-size: 13px;
-}
+.empty-state { text-align: center; padding: 30px; color: #555; font-size: 13px; }
 .empty-state i { font-size: 36px; display: block; margin-bottom: 8px; color: #aaa; }
 
-.tag { display: inline-block; font-size: 10px; background: #e0e0e0; border: 1px solid #999; padding: 0 5px; margin-left: 4px; }
+.appwrite-badge { font-size: 10px; background: #fd366e; color: #fff; border: 1px solid #cc0055; padding: 1px 6px; display: inline-block; margin-left: 6px; }
+
+.storage-indicator { font-size: 10px; color: #555; padding: 4px 8px; background: #f0f0f0; border: 1px solid #ccc; display: inline-flex; align-items: center; gap: 4px; }
+.storage-indicator .dot { width: 6px; height: 6px; border-radius: 50%; background: #00aa44; display: inline-block; }
+.storage-indicator .dot.offline { background: #cc0000; }
 </style>
 </head>
 <body>
 
-<div class="container" id="app">
+<!-- ===== LOADING SCREEN ===== -->
+<div id="loading-screen">
+  <div class="scanlines"></div>
+  <div class="noise"></div>
 
-  <!-- HEADER -->
+  <div class="load-corner tl">OM_DOCS_SYS v1.0</div>
+  <div class="load-corner tr" id="lc-time">00:00:00</div>
+  <div class="load-corner bl">APPWRITE_CLOUD // SGP</div>
+  <div class="load-corner br" id="lc-pct">0%</div>
+
+  <div class="load-inner">
+    <div class="load-logo">
+      <div class="file-shuffle">
+        <div class="shuffle-file"><i class="fa-solid fa-file-pdf" style="color:#ff4455;font-size:12px;"></i></div>
+        <div class="shuffle-file"><i class="fa-solid fa-file-word" style="color:#4488ff;font-size:12px;"></i></div>
+        <div class="shuffle-file"><i class="fa-solid fa-file-lines" style="color:#00ff88;font-size:12px;"></i></div>
+      </div>
+      <h1>OM'S DOCS</h1>
+      <span>Document Management System</span>
+    </div>
+
+    <div class="load-progress-wrap">
+      <div class="load-progress-bar-outer">
+        <div class="load-progress-bar-inner" id="load-bar"></div>
+      </div>
+      <div class="load-pct" id="load-pct-text">INITIALIZING...</div>
+    </div>
+
+    <div class="load-status-list" id="load-steps">
+      <!-- injected by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="app">
+<div class="container">
   <div class="site-header">
     <i class="fa-solid fa-folder-open header-icon"></i>
     <div>
-      <h1>Om's Docs</h1>
-      <span style="font-size:11px;color:#555;">Document Management System v1.0</span>
+      <h1>Om's Docs <span class="appwrite-badge"><i class="fa-solid fa-cloud"></i> Appwrite</span></h1>
+      <span style="font-size:11px;color:#555;">Document Management System v1.0 &nbsp;|&nbsp; <span id="storage-status" class="storage-indicator"><span class="dot" id="status-dot"></span><span id="status-text">Connected</span></span></span>
     </div>
   </div>
 
-  <!-- NAV -->
   <div class="site-nav" id="site-nav">
-    <a href="#" onclick="showPage('home')" id="nav-home" class="active">
-      <i class="fa-solid fa-house"></i>Home
-    </a>
-    <a href="#" onclick="showPage('docs')" id="nav-docs">
-      <i class="fa-solid fa-file-lines"></i>My Docs
-    </a>
-    <a href="#" onclick="showPage('about')" id="nav-about">
-      <i class="fa-solid fa-circle-info"></i>About
-    </a>
+    <a href="#" onclick="showPage('home')" id="nav-home" class="active"><i class="fa-solid fa-house"></i>Home</a>
+    <a href="#" onclick="showPage('docs')" id="nav-docs"><i class="fa-solid fa-file-lines"></i>My Docs</a>
+    <a href="#" onclick="showPage('about')" id="nav-about"><i class="fa-solid fa-circle-info"></i>About</a>
   </div>
 
-  <!-- ===== HOME PAGE ===== -->
+  <!-- HOME PAGE -->
   <div class="page active" id="page-home">
     <div class="section">
       <h2><i class="fa-solid fa-gauge"></i> Dashboard</h2>
-      <div class="stats-row" id="stats-row">
-        <div class="stat-box">
-          <div class="stat-num" id="stat-total">0</div>
-          <div class="stat-label"><i class="fa-solid fa-file"></i> Total Files</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-num" id="stat-pdf">0</div>
-          <div class="stat-label"><i class="fa-solid fa-file-pdf"></i> PDFs</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-num" id="stat-word">0</div>
-          <div class="stat-label"><i class="fa-solid fa-file-word"></i> Word Docs</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-num" id="stat-other">0</div>
-          <div class="stat-label"><i class="fa-solid fa-file-circle-question"></i> Other</div>
-        </div>
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-num" id="stat-total">0</div><div class="stat-label"><i class="fa-solid fa-file"></i> Total Files</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat-pdf">0</div><div class="stat-label"><i class="fa-solid fa-file-pdf"></i> PDFs</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat-word">0</div><div class="stat-label"><i class="fa-solid fa-file-word"></i> Word Docs</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat-other">0</div><div class="stat-label"><i class="fa-solid fa-file-circle-question"></i> Other</div></div>
       </div>
     </div>
-
     <div class="section">
       <h2><i class="fa-solid fa-clock-rotate-left"></i> Recent Documents</h2>
-      <div id="recent-list">
-        <div class="empty-state">
-          <i class="fa-solid fa-box-open"></i>
-          No documents yet. Head to <a href="#" onclick="showPage('docs')">My Docs</a> to add some.
-        </div>
-      </div>
+      <div id="recent-list"><div class="empty-state"><i class="fa-solid fa-box-open"></i>No documents yet. Head to <a href="#" onclick="showPage('docs')">My Docs</a> to add some.</div></div>
     </div>
   </div>
 
-  <!-- ===== DOCS PAGE ===== -->
+  <!-- DOCS PAGE -->
   <div class="page" id="page-docs">
     <div class="section">
       <h2><i class="fa-solid fa-folder-plus"></i> Add Document</h2>
-
       <div id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
         <i class="fa-solid fa-cloud-arrow-up"></i>
         <p><strong>Click to browse</strong> or drag &amp; drop files here</p>
-        <p>Supported: PDF, DOC, DOCX, TXT, PNG, JPG, GIF</p>
+        <p>Supported: PDF, DOC, DOCX, TXT, PNG, JPG, GIF &mdash; Stored in <strong>Appwrite Cloud</strong></p>
       </div>
       <input type="file" id="file-input" multiple accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.gif,.bmp,.webp" onchange="handleFiles(this.files)" />
-
       <div class="progress-wrap" id="progress-wrap">
         <div class="progress-bar" id="progress-bar"></div>
         <div class="progress-label" id="progress-label">0%</div>
       </div>
     </div>
-
     <div class="section">
       <h2><i class="fa-solid fa-list"></i> All Documents</h2>
       <div class="search-bar">
@@ -455,42 +495,35 @@ table td i { margin-right: 5px; }
         </select>
         <button class="btn" onclick="sortDocs()"><i class="fa-solid fa-arrow-up-a-z"></i> Sort</button>
       </div>
-
-      <div id="docs-list-wrap">
-        <div class="empty-state">
-          <i class="fa-solid fa-inbox"></i>
-          No documents stored yet.
-        </div>
-      </div>
+      <div id="docs-list-wrap"><div class="empty-state"><i class="fa-solid fa-inbox"></i>No documents stored yet.</div></div>
     </div>
   </div>
 
-  <!-- ===== ABOUT PAGE ===== -->
+  <!-- ABOUT PAGE -->
   <div class="page" id="page-about">
     <div class="section about-section">
       <h2><i class="fa-solid fa-circle-info"></i> About Om's Docs</h2>
       <hr class="retro-hr" />
-      <p>
-        <strong>Om's Docs</strong> is a personal document management system built for simplicity and efficiency.
-        Store, browse, and view your files right in the browser — no complicated setup required.
-      </p>
+      <p><strong>Om's Docs</strong> is a personal document management system. Files are securely stored in <strong>Appwrite Cloud</strong> (Singapore region) and accessible from any device.</p>
       <hr class="retro-hr" />
       <h3><i class="fa-solid fa-list-check"></i> Features</h3>
       <ul>
-        <li><i class="fa-solid fa-check"></i> &nbsp;Store documents locally in your browser</li>
+        <li><i class="fa-solid fa-check"></i> &nbsp;Store documents in Appwrite Cloud</li>
         <li><i class="fa-solid fa-check"></i> &nbsp;View PDFs with page-by-page navigation</li>
         <li><i class="fa-solid fa-check"></i> &nbsp;Preview images and plain-text files</li>
         <li><i class="fa-solid fa-check"></i> &nbsp;Print and download any stored document</li>
         <li><i class="fa-solid fa-check"></i> &nbsp;Search and filter your document library</li>
         <li><i class="fa-solid fa-check"></i> &nbsp;Drag &amp; drop file adding</li>
         <li><i class="fa-solid fa-check"></i> &nbsp;Dashboard with file statistics</li>
+        <li><i class="fa-solid fa-check"></i> &nbsp;Cross-device access via cloud storage</li>
       </ul>
+      <hr class="retro-hr" />
+      <h3><i class="fa-solid fa-cloud"></i> Storage</h3>
+      <p style="font-size:13px;">Files are stored in Appwrite Cloud Storage (Bucket: <code>files.om.docs</code>) and metadata is persisted in localStorage as an index cache.</p>
       <hr class="retro-hr" />
       <h3><i class="fa-solid fa-file-circle-check"></i> Supported Formats</h3>
       <table>
-        <thead>
-          <tr><th>Extension</th><th>Type</th><th>Viewer</th></tr>
-        </thead>
+        <thead><tr><th>Extension</th><th>Type</th><th>Viewer</th></tr></thead>
         <tbody>
           <tr><td><i class="fa-solid fa-file-pdf file-icon-pdf"></i> .pdf</td><td>PDF Document</td><td>Built-in PDF Viewer</td></tr>
           <tr><td><i class="fa-solid fa-file-word file-icon-word"></i> .doc / .docx</td><td>Word Document</td><td>Browser Viewer</td></tr>
@@ -499,24 +532,19 @@ table td i { margin-right: 5px; }
         </tbody>
       </table>
       <hr class="retro-hr" />
-      <p style="font-size:11px;color:#555;">
-        <i class="fa-solid fa-circle-exclamation"></i>
-        Files are stored in your browser's local storage. Clearing browser data will remove them.
-        &nbsp;|&nbsp; Om's Docs &copy; 2025
-      </p>
+      <p style="font-size:11px;color:#555;"><i class="fa-solid fa-circle-exclamation"></i> Om's Docs &copy; 2025</p>
     </div>
   </div>
 
-  <!-- FOOTER -->
   <div class="site-footer">
-    <i class="fa-solid fa-floppy-disk"></i>
-    Om's Docs &mdash; Document Management System &nbsp;|&nbsp;
+    <i class="fa-solid fa-cloud"></i> Om's Docs &mdash; Powered by Appwrite Cloud &nbsp;|&nbsp;
     <i class="fa-solid fa-code"></i> Built with retro style &nbsp;|&nbsp;
     <i class="fa-regular fa-copyright"></i> 2025 Om
   </div>
 </div>
+</div>
 
-<!-- ===== VIEWER MODAL ===== -->
+<!-- VIEWER MODAL -->
 <div class="modal-overlay" id="viewer-modal">
   <div class="modal-box">
     <div class="modal-titlebar">
@@ -539,41 +567,235 @@ table td i { margin-right: 5px; }
         <button class="btn" onclick="pdfZoomReset()"><i class="fa-solid fa-expand"></i> Fit</button>
       </span>
     </div>
-    <div class="modal-body" id="modal-body">
-      <!-- dynamic content -->
-    </div>
+    <div class="modal-body" id="modal-body"></div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div id="toast"></div>
-
-<!-- ===== UPLOAD PAGE (hidden route) ===== -->
-<!-- Accessible at ?page=upload in URL silently -->
 
 <script>
 // =============================================
-// STORAGE LAYER (localStorage as Vercel-KV-style KV)
-// Key: oms_docs_index   Value: JSON array of doc metadata
-// Key: oms_doc_{id}     Value: base64 data URL
+// APPWRITE CONFIG
 // =============================================
-const KV = {
-  get(key) {
-    try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; }
+const AW = {
+  endpoint:  'https://sgp.cloud.appwrite.io/v1',
+  projectId: '69ccd03a003e394a6057',
+  bucketId:  'files.om.docs',
+
+  headers() {
+    return {
+      'Content-Type': 'application/json',
+      'X-Appwrite-Project': this.projectId,
+    };
   },
-  set(key, val) {
-    localStorage.setItem(key, JSON.stringify(val));
+
+  async listFiles() {
+    const url = `${this.endpoint}/storage/buckets/${this.bucketId}/files?limit=100`;
+    const res = await fetch(url, { headers: this.headers() });
+    if (!res.ok) throw new Error(`List failed: ${res.status}`);
+    return res.json();
   },
-  del(key) {
-    localStorage.removeItem(key);
+
+  async uploadFile(file) {
+    const formData = new FormData();
+    const fileId = 'doc_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+    formData.append('fileId', fileId);
+    formData.append('file', file);
+    const res = await fetch(
+      `${this.endpoint}/storage/buckets/${this.bucketId}/files`,
+      {
+        method: 'POST',
+        headers: { 'X-Appwrite-Project': this.projectId },
+        body: formData
+      }
+    );
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Upload failed: ${res.status}`);
+    }
+    return res.json();
+  },
+
+  async deleteFile(fileId) {
+    const res = await fetch(
+      `${this.endpoint}/storage/buckets/${this.bucketId}/files/${fileId}`,
+      { method: 'DELETE', headers: this.headers() }
+    );
+    if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
+    return true;
+  },
+
+  getDownloadUrl(fileId) {
+    return `${this.endpoint}/storage/buckets/${this.bucketId}/files/${fileId}/download?project=${this.projectId}`;
+  },
+
+  getViewUrl(fileId) {
+    return `${this.endpoint}/storage/buckets/${this.bucketId}/files/${fileId}/view?project=${this.projectId}`;
   }
 };
 
-function getDocs() { return KV.get('oms_docs_index') || []; }
-function saveDocs(docs) { KV.set('oms_docs_index', docs); }
+// =============================================
+// LOCAL METADATA CACHE
+// =============================================
+function getCachedMeta() {
+  try { return JSON.parse(localStorage.getItem('oms_docs_meta_v2')) || []; } catch(e) { return []; }
+}
+function saveCachedMeta(docs) {
+  localStorage.setItem('oms_docs_meta_v2', JSON.stringify(docs));
+}
 
 // =============================================
-// ROUTING / NAVIGATION
+// ANIMATED LOADING SCREEN
+// =============================================
+const LOAD_STEPS = [
+  { id: 's1',  icon: 'fa-plug',                 text: 'Connecting to database...' },
+  { id: 's2',  icon: 'fa-key',                  text: 'Validating project keys...' },
+  { id: 's3',  icon: 'fa-satellite-dish',        text: 'Pinging Appwrite servers (SGP)...' },
+  { id: 's4',  icon: 'fa-shield-halved',         text: 'Authenticating session...' },
+  { id: 's5',  icon: 'fa-folder-open',           text: 'Opening storage bucket...' },
+  { id: 's6',  icon: 'fa-server',                text: 'Loading files metadata...' },
+  { id: 's7',  icon: 'fa-images',                text: 'Fetching file icons...' },
+  { id: 's8',  icon: 'fa-sort',                  text: 'Sorting document index...' },
+  { id: 's9',  icon: 'fa-chart-bar',             text: 'Calculating storage stats...' },
+  { id: 's10', icon: 'fa-circle-check',          text: 'Done!' },
+];
+
+function buildLoadSteps() {
+  const wrap = document.getElementById('load-steps');
+  wrap.innerHTML = LOAD_STEPS.map(s =>
+    `<div class="load-step" id="${s.id}">
+       <span class="step-icon"><i class="fa-solid ${s.icon}"></i></span>
+       <span>${s.text}</span>
+     </div>`
+  ).join('');
+}
+
+function setStepDone(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('active');
+  el.classList.add('done');
+  el.querySelector('.step-icon').innerHTML = '<i class="fa-solid fa-check"></i>';
+}
+
+function setStepActive(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add('active');
+  el.querySelector('.step-icon').innerHTML = '<i class="fa-solid fa-spinner spin"></i>';
+}
+
+function setLoadProgress(pct, label) {
+  document.getElementById('load-bar').style.width = pct + '%';
+  document.getElementById('load-pct-text').textContent = label || (pct + '%');
+  document.getElementById('lc-pct').textContent = pct + '%';
+}
+
+async function runLoadingSequence() {
+  buildLoadSteps();
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  let appwriteDocs = [];
+
+  const timings = [320, 280, 400, 300, 350, 600, 250, 200, 200, 400];
+  const pcts    = [  8,  18,  28,  38,  48,  72,  82,  88,  93, 100];
+
+  for (let i = 0; i < LOAD_STEPS.length; i++) {
+    const step = LOAD_STEPS[i];
+    setStepActive(step.id);
+    setLoadProgress(i === 0 ? 3 : pcts[i-1], null);
+
+    // On step 6: actually fetch from Appwrite
+    if (step.id === 's6') {
+      try {
+        const result = await AW.listFiles();
+        appwriteDocs = result.files || [];
+        syncMetadataFromAppwrite(appwriteDocs);
+        setStorageStatus(true);
+      } catch(e) {
+        console.warn('Appwrite fetch failed:', e.message);
+        setStorageStatus(false);
+        // Fall back to cached metadata
+        appwriteDocs = [];
+      }
+    }
+
+    await delay(timings[i]);
+    setStepDone(step.id);
+    setLoadProgress(pcts[i], pcts[i] === 100 ? 'READY!' : null);
+  }
+
+  await delay(500);
+  hideLodingScreen();
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function hideLodingScreen() {
+  const ls = document.getElementById('loading-screen');
+  ls.style.transition = 'opacity 0.6s ease';
+  ls.style.opacity = '0';
+  setTimeout(() => {
+    ls.style.display = 'none';
+    document.getElementById('app').classList.add('ready');
+    refreshHome();
+    renderDocsList();
+  }, 600);
+}
+
+function updateClock() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('lc-time').textContent = pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds());
+}
+
+// =============================================
+// SYNC APPWRITE → LOCAL CACHE
+// =============================================
+function syncMetadataFromAppwrite(awFiles) {
+  const cached = getCachedMeta();
+  const cachedIds = new Set(cached.map(d => d.id));
+
+  // Add new files from Appwrite not in cache
+  const merged = [...cached];
+  awFiles.forEach(f => {
+    if (!cachedIds.has(f.$id)) {
+      merged.unshift({
+        id: f.$id,
+        name: f.name,
+        type: getFileType(f.name),
+        size: f.sizeOriginal,
+        added: new Date(f.$createdAt).getTime(),
+        mimeType: f.mimeType
+      });
+    }
+  });
+
+  // Remove cached items that no longer exist in Appwrite
+  const awIds = new Set(awFiles.map(f => f.$id));
+  const filtered = merged.filter(d => awIds.has(d.id));
+
+  saveCachedMeta(filtered);
+}
+
+// =============================================
+// STATUS INDICATOR
+// =============================================
+function setStorageStatus(online) {
+  const dot  = document.getElementById('status-dot');
+  const text = document.getElementById('status-text');
+  if (online) {
+    dot.classList.remove('offline');
+    text.textContent = 'Appwrite Connected';
+  } else {
+    dot.classList.add('offline');
+    text.textContent = 'Offline (cached)';
+  }
+}
+
+// =============================================
+// ROUTING
 // =============================================
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -583,14 +805,6 @@ function showPage(name) {
   if (name === 'home') refreshHome();
   if (name === 'docs') renderDocsList();
 }
-
-// Handle ?page=upload silently
-(function checkRoute() {
-  const params = new URLSearchParams(location.search);
-  if (params.get('page') === 'upload') {
-    showPage('docs');
-  }
-})();
 
 // =============================================
 // FILE HELPERS
@@ -603,115 +817,96 @@ function getFileType(name) {
   if (ext === 'txt') return 'text';
   return 'other';
 }
-
 function getFileIcon(type) {
-  const map = {
-    pdf:   '<i class="fa-solid fa-file-pdf file-icon-pdf"></i>',
-    word:  '<i class="fa-solid fa-file-word file-icon-word"></i>',
-    image: '<i class="fa-solid fa-file-image file-icon-img"></i>',
-    text:  '<i class="fa-solid fa-file-lines file-icon-txt"></i>',
-    other: '<i class="fa-solid fa-file file-icon-other"></i>'
-  };
+  const map = { pdf:'<i class="fa-solid fa-file-pdf file-icon-pdf"></i>', word:'<i class="fa-solid fa-file-word file-icon-word"></i>', image:'<i class="fa-solid fa-file-image file-icon-img"></i>', text:'<i class="fa-solid fa-file-lines file-icon-txt"></i>', other:'<i class="fa-solid fa-file file-icon-other"></i>' };
   return map[type] || map.other;
 }
-
 function getBadge(type) {
-  const map = {
-    pdf:   '<span class="badge badge-pdf">PDF</span>',
-    word:  '<span class="badge badge-word">WORD</span>',
-    image: '<span class="badge badge-img">IMG</span>',
-    text:  '<span class="badge">TXT</span>',
-    other: '<span class="badge">FILE</span>'
-  };
+  const map = { pdf:'<span class="badge badge-pdf">PDF</span>', word:'<span class="badge badge-word">WORD</span>', image:'<span class="badge badge-img">IMG</span>', text:'<span class="badge">TXT</span>', other:'<span class="badge">FILE</span>' };
   return map[type] || map.other;
 }
-
 function formatSize(bytes) {
+  if (!bytes) return '—';
   if (bytes < 1024) return bytes + ' B';
   if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
   return (bytes/1024/1024).toFixed(2) + ' MB';
 }
-
 function formatDate(ts) {
   const d = new Date(ts);
   return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 }
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
 // =============================================
-// FILE UPLOAD
+// FILE UPLOAD → APPWRITE
 // =============================================
 let sortAsc = true;
 
-function handleDragOver(e) {
-  e.preventDefault();
-  document.getElementById('drop-zone').classList.add('drag-over');
-}
-function handleDragLeave(e) {
-  document.getElementById('drop-zone').classList.remove('drag-over');
-}
-function handleDrop(e) {
-  e.preventDefault();
-  document.getElementById('drop-zone').classList.remove('drag-over');
-  handleFiles(e.dataTransfer.files);
-}
+function handleDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
+function handleDragLeave(e) { document.getElementById('drop-zone').classList.remove('drag-over'); }
+function handleDrop(e) { e.preventDefault(); document.getElementById('drop-zone').classList.remove('drag-over'); handleFiles(e.dataTransfer.files); }
 
-function handleFiles(files) {
+async function handleFiles(files) {
   if (!files || !files.length) return;
   const arr = Array.from(files);
-  let idx = 0;
   const pw = document.getElementById('progress-wrap');
   const pb = document.getElementById('progress-bar');
   const pl = document.getElementById('progress-label');
   pw.style.display = 'block';
 
-  function processNext() {
-    if (idx >= arr.length) {
-      pw.style.display = 'none';
-      renderDocsList();
-      refreshHome();
-      showToast('<i class="fa-solid fa-check"></i> ' + arr.length + ' file(s) added');
-      document.getElementById('file-input').value = '';
-      return;
-    }
-    const file = arr[idx];
-    const pct = Math.round((idx / arr.length) * 100);
-    pb.style.width = pct + '%';
-    pl.textContent = pct + '%';
+  let uploaded = 0;
+  const errors = [];
 
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const docs = getDocs();
-      const id = 'doc_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+  for (let i = 0; i < arr.length; i++) {
+    const file = arr[i];
+    const pct = Math.round((i / arr.length) * 100);
+    pb.style.width = pct + '%';
+    pl.textContent = `Uploading ${file.name}... (${i+1}/${arr.length})`;
+
+    try {
+      const result = await AW.uploadFile(file);
       const meta = {
-        id,
-        name: file.name,
-        type: getFileType(file.name),
-        size: file.size,
-        added: Date.now()
+        id: result.$id,
+        name: result.name,
+        type: getFileType(result.name),
+        size: result.sizeOriginal,
+        added: new Date(result.$createdAt).getTime(),
+        mimeType: result.mimeType
       };
+      const docs = getCachedMeta();
       docs.unshift(meta);
-      saveDocs(docs);
-      try {
-        KV.set('oms_doc_' + id, e.target.result);
-      } catch(err) {
-        showToast('<i class="fa-solid fa-triangle-exclamation"></i> File too large to store: ' + file.name);
-      }
-      idx++;
-      setTimeout(processNext, 80);
-    };
-    reader.onerror = function() { idx++; processNext(); };
-    reader.readAsDataURL(file);
+      saveCachedMeta(docs);
+      uploaded++;
+    } catch(e) {
+      console.error('Upload error:', e);
+      errors.push(file.name + ': ' + e.message);
+    }
   }
-  processNext();
+
+  pb.style.width = '100%';
+  pl.textContent = 'Done!';
+  setTimeout(() => { pw.style.display = 'none'; pb.style.width = '0%'; }, 1200);
+
+  renderDocsList();
+  refreshHome();
+  document.getElementById('file-input').value = '';
+
+  if (errors.length) {
+    showToast('<i class="fa-solid fa-triangle-exclamation"></i> ' + errors.length + ' file(s) failed. Check console.');
+  } else {
+    showToast('<i class="fa-solid fa-check"></i> ' + uploaded + ' file(s) uploaded to Appwrite');
+  }
 }
 
 // =============================================
-// RENDER DOCS LIST
+// DOCS LIST
 // =============================================
 function renderDocsList() {
   const query = (document.getElementById('search-input')?.value || '').toLowerCase();
   const filterType = document.getElementById('filter-type')?.value || '';
-  let docs = getDocs();
+  let docs = getCachedMeta();
 
   if (query) docs = docs.filter(d => d.name.toLowerCase().includes(query));
   if (filterType) docs = docs.filter(d => d.type === filterType);
@@ -722,15 +917,7 @@ function renderDocsList() {
     return;
   }
 
-  let html = '<table><thead><tr>' +
-    '<th style="width:30px;"></th>' +
-    '<th>Filename</th>' +
-    '<th style="width:60px;">Type</th>' +
-    '<th style="width:80px;">Size</th>' +
-    '<th style="width:130px;">Date Added</th>' +
-    '<th style="width:160px;">Actions</th>' +
-    '</tr></thead><tbody>';
-
+  let html = '<table><thead><tr><th style="width:30px;"></th><th>Filename</th><th style="width:60px;">Type</th><th style="width:80px;">Size</th><th style="width:130px;">Date Added</th><th style="width:180px;">Actions</th></tr></thead><tbody>';
   docs.forEach(doc => {
     html += `<tr>
       <td>${getFileIcon(doc.type)}</td>
@@ -740,6 +927,7 @@ function renderDocsList() {
       <td style="font-size:11px;">${formatDate(doc.added)}</td>
       <td>
         <button class="btn btn-primary" onclick="openViewer('${doc.id}')" title="View"><i class="fa-solid fa-eye"></i> View</button>
+        <button class="btn" onclick="downloadDirect('${doc.id}','${escHtml(doc.name)}')" title="Download"><i class="fa-solid fa-download"></i></button>
         <button class="btn btn-danger" onclick="deleteDoc('${doc.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
       </td>
     </tr>`;
@@ -749,35 +937,41 @@ function renderDocsList() {
 }
 
 function sortDocs() {
-  const docs = getDocs();
-  docs.sort((a, b) => sortAsc
-    ? a.name.localeCompare(b.name)
-    : b.name.localeCompare(a.name)
-  );
+  const docs = getCachedMeta();
+  docs.sort((a, b) => sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
   sortAsc = !sortAsc;
-  saveDocs(docs);
+  saveCachedMeta(docs);
   renderDocsList();
 }
 
-function deleteDoc(id) {
-  if (!confirm('Delete this document?')) return;
-  let docs = getDocs().filter(d => d.id !== id);
-  saveDocs(docs);
-  KV.del('oms_doc_' + id);
-  renderDocsList();
-  refreshHome();
-  showToast('<i class="fa-solid fa-trash"></i> Document deleted');
+async function deleteDoc(id) {
+  if (!confirm('Delete this document from Appwrite Cloud?')) return;
+  try {
+    await AW.deleteFile(id);
+    const docs = getCachedMeta().filter(d => d.id !== id);
+    saveCachedMeta(docs);
+    renderDocsList();
+    refreshHome();
+    showToast('<i class="fa-solid fa-trash"></i> Document deleted from Appwrite');
+  } catch(e) {
+    showToast('<i class="fa-solid fa-triangle-exclamation"></i> Delete failed: ' + e.message);
+  }
 }
 
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function downloadDirect(fileId, name) {
+  const a = document.createElement('a');
+  a.href = AW.getDownloadUrl(fileId);
+  a.download = name;
+  a.target = '_blank';
+  a.click();
+  showToast('<i class="fa-solid fa-download"></i> Downloading ' + name);
 }
 
 // =============================================
 // HOME DASHBOARD
 // =============================================
 function refreshHome() {
-  const docs = getDocs();
+  const docs = getCachedMeta();
   document.getElementById('stat-total').textContent = docs.length;
   document.getElementById('stat-pdf').textContent   = docs.filter(d=>d.type==='pdf').length;
   document.getElementById('stat-word').textContent  = docs.filter(d=>d.type==='word').length;
@@ -806,124 +1000,106 @@ function refreshHome() {
 // =============================================
 // PDF VIEWER STATE
 // =============================================
-let pdfDoc = null;
-let pdfCurrentPage = 1;
-let pdfScale = 1.2;
-let currentDocData = null;
-let currentDocMeta = null;
+let pdfDoc = null, pdfCurrentPage = 1, pdfScale = 1.2;
+let currentDocId = null, currentDocMeta = null;
 
 // =============================================
-// VIEWER
+// VIEWER — loads file from Appwrite
 // =============================================
 async function openViewer(id) {
-  const docs = getDocs();
+  const docs = getCachedMeta();
   const meta = docs.find(d => d.id === id);
   if (!meta) { showToast('Document not found'); return; }
 
-  const dataUrl = KV.get('oms_doc_' + id);
-  if (!dataUrl) { showToast('File data missing'); return; }
-
-  currentDocData = dataUrl;
+  currentDocId = id;
   currentDocMeta = meta;
 
   document.getElementById('modal-filename').textContent = meta.name;
   document.getElementById('pdf-controls').style.display = 'none';
-  document.getElementById('modal-body').innerHTML = '<div style="color:#fff;padding:20px;"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
-
+  document.getElementById('modal-body').innerHTML = '<div style="color:#fff;padding:20px;text-align:center;"><i class="fa-solid fa-spinner fa-spin"></i> Loading from Appwrite...</div>';
   document.getElementById('viewer-modal').classList.add('open');
 
+  const viewUrl = AW.getViewUrl(id);
+
   if (meta.type === 'pdf') {
-    await renderPDF(dataUrl);
+    await renderPDF(viewUrl);
   } else if (meta.type === 'image') {
-    renderImage(dataUrl, meta.name);
+    renderImage(viewUrl, meta.name);
   } else if (meta.type === 'text') {
-    renderText(dataUrl);
+    await renderTextFromUrl(viewUrl);
   } else {
-    renderGeneric(dataUrl, meta.name);
+    renderGeneric(viewUrl, meta.name);
   }
 }
 
-async function renderPDF(dataUrl) {
+async function renderPDF(url) {
   document.getElementById('pdf-controls').style.display = 'inline-flex';
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-  const base64 = dataUrl.split(',')[1];
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-
-  pdfDoc = await pdfjsLib.getDocument({ data: bytes }).promise;
-  document.getElementById('pdf-total-pages').textContent = pdfDoc.numPages;
-  document.getElementById('pdf-page-input').max = pdfDoc.numPages;
-  pdfCurrentPage = 1;
-  await renderPDFPage(pdfCurrentPage);
+  try {
+    pdfDoc = await pdfjsLib.getDocument(url).promise;
+    document.getElementById('pdf-total-pages').textContent = pdfDoc.numPages;
+    document.getElementById('pdf-page-input').max = pdfDoc.numPages;
+    pdfCurrentPage = 1;
+    await renderPDFPage(pdfCurrentPage);
+  } catch(e) {
+    document.getElementById('modal-body').innerHTML = `<div style="color:#ffcccc;padding:20px;background:#333;">
+      <i class="fa-solid fa-triangle-exclamation"></i> Could not load PDF: ${e.message}<br>
+      <small>Try downloading the file instead.</small>
+    </div>`;
+  }
 }
 
 async function renderPDFPage(num) {
   if (!pdfDoc) return;
   const page = await pdfDoc.getPage(num);
   const viewport = page.getViewport({ scale: pdfScale });
-
   const canvas = document.createElement('canvas');
   canvas.width = viewport.width;
   canvas.height = viewport.height;
-  const ctx = canvas.getContext('2d');
-
-  await page.render({ canvasContext: ctx, viewport }).promise;
+  await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
   document.getElementById('modal-body').innerHTML = '';
   document.getElementById('modal-body').appendChild(canvas);
   document.getElementById('pdf-page-input').value = num;
 }
 
-async function pdfNextPage() {
-  if (!pdfDoc || pdfCurrentPage >= pdfDoc.numPages) return;
-  pdfCurrentPage++;
-  await renderPDFPage(pdfCurrentPage);
-}
-async function pdfPrevPage() {
-  if (!pdfDoc || pdfCurrentPage <= 1) return;
-  pdfCurrentPage--;
-  await renderPDFPage(pdfCurrentPage);
-}
-async function pdfGoToPage(n) {
-  const num = parseInt(n);
-  if (!pdfDoc || isNaN(num) || num < 1 || num > pdfDoc.numPages) return;
-  pdfCurrentPage = num;
-  await renderPDFPage(pdfCurrentPage);
-}
+async function pdfNextPage() { if (!pdfDoc || pdfCurrentPage >= pdfDoc.numPages) return; pdfCurrentPage++; await renderPDFPage(pdfCurrentPage); }
+async function pdfPrevPage() { if (!pdfDoc || pdfCurrentPage <= 1) return; pdfCurrentPage--; await renderPDFPage(pdfCurrentPage); }
+async function pdfGoToPage(n) { const num = parseInt(n); if (!pdfDoc || isNaN(num) || num < 1 || num > pdfDoc.numPages) return; pdfCurrentPage = num; await renderPDFPage(pdfCurrentPage); }
 async function pdfZoomIn() { pdfScale = Math.min(pdfScale + 0.25, 4); await renderPDFPage(pdfCurrentPage); }
 async function pdfZoomOut() { pdfScale = Math.max(pdfScale - 0.25, 0.5); await renderPDFPage(pdfCurrentPage); }
 async function pdfZoomReset() { pdfScale = 1.2; await renderPDFPage(pdfCurrentPage); }
 
-function renderImage(dataUrl, name) {
+function renderImage(url, name) {
   const div = document.createElement('div');
   div.className = 'modal-img-wrap';
   const img = document.createElement('img');
-  img.src = dataUrl;
+  img.src = url;
   img.alt = name;
   div.appendChild(img);
   document.getElementById('modal-body').innerHTML = '';
   document.getElementById('modal-body').appendChild(div);
 }
 
-function renderText(dataUrl) {
-  const base64 = dataUrl.split(',')[1];
-  const text = decodeURIComponent(escape(atob(base64)));
-  const div = document.createElement('div');
-  div.className = 'modal-txt-wrap';
-  div.textContent = text;
-  document.getElementById('modal-body').innerHTML = '';
-  document.getElementById('modal-body').appendChild(div);
+async function renderTextFromUrl(url) {
+  try {
+    const res = await fetch(url);
+    const text = await res.text();
+    const div = document.createElement('div');
+    div.className = 'modal-txt-wrap';
+    div.textContent = text;
+    document.getElementById('modal-body').innerHTML = '';
+    document.getElementById('modal-body').appendChild(div);
+  } catch(e) {
+    document.getElementById('modal-body').innerHTML = '<div style="color:#ffcccc;padding:20px;">Could not load text file.</div>';
+  }
 }
 
-function renderGeneric(dataUrl, name) {
+function renderGeneric(url, name) {
   const iframe = document.createElement('iframe');
-  iframe.src = dataUrl;
+  iframe.src = url;
   iframe.title = name;
-  iframe.style.width = '100%';
-  iframe.style.height = '100%';
-  iframe.style.border = 'none';
-  iframe.style.background = '#fff';
+  iframe.style.cssText = 'width:100%;height:100%;border:none;background:#fff;';
   document.getElementById('modal-body').innerHTML = '';
   document.getElementById('modal-body').appendChild(iframe);
 }
@@ -932,7 +1108,7 @@ function closeViewer() {
   document.getElementById('viewer-modal').classList.remove('open');
   document.getElementById('modal-body').innerHTML = '';
   pdfDoc = null;
-  currentDocData = null;
+  currentDocId = null;
   currentDocMeta = null;
 }
 
@@ -940,56 +1116,36 @@ function closeViewer() {
 // PRINT & DOWNLOAD
 // =============================================
 function printDoc() {
-  if (!currentDocData || !currentDocMeta) return;
+  if (!currentDocMeta) return;
+  const url = AW.getViewUrl(currentDocId);
 
   if (currentDocMeta.type === 'pdf') {
-    // render all pages to a hidden printable window
-    const win = window.open('', '_blank');
-    win.document.write('<html><head><title>' + escHtml(currentDocMeta.name) + '</title><style>body{margin:0;}canvas{display:block;margin:0 auto;page-break-after:always;}</style></head><body>');
-    win.document.write('<p style="text-align:center;font-family:Verdana;font-size:12px;">Loading all pages for print...</p>');
-    win.document.write('</body></html>');
-
-    // Print from current page canvas
     const canvases = document.getElementById('modal-body').querySelectorAll('canvas');
     if (canvases.length) {
       const pw = window.open('', '_blank');
       pw.document.write('<html><head><title>Print</title><style>body{margin:0;}img{display:block;max-width:100%;page-break-after:always;}</style></head><body>');
-      canvases.forEach(c => {
-        pw.document.write('<img src="' + c.toDataURL() + '" />');
-      });
+      canvases.forEach(c => { pw.document.write('<img src="' + c.toDataURL() + '" />'); });
       pw.document.write('</body></html>');
       pw.document.close();
       pw.focus();
       setTimeout(() => pw.print(), 600);
     }
-    win.close();
-  } else if (['image','text'].includes(currentDocMeta.type)) {
+  } else if (currentDocMeta.type === 'image') {
     const pw = window.open('', '_blank');
-    pw.document.write('<html><head><title>' + escHtml(currentDocMeta.name) + '</title></head><body>');
-    if (currentDocMeta.type === 'image') {
-      pw.document.write('<img src="' + currentDocData + '" style="max-width:100%;" />');
-    } else {
-      const base64 = currentDocData.split(',')[1];
-      const text = decodeURIComponent(escape(atob(base64)));
-      pw.document.write('<pre style="font-family:monospace;font-size:13px;">' + escHtml(text) + '</pre>');
-    }
-    pw.document.write('</body></html>');
+    pw.document.write(`<html><head><title>${escHtml(currentDocMeta.name)}</title></head><body><img src="${url}" style="max-width:100%;"/></body></html>`);
     pw.document.close();
     pw.focus();
     setTimeout(() => pw.print(), 400);
   } else {
     const iframe = document.querySelector('#modal-body iframe');
-    if (iframe) { iframe.contentWindow.focus(); iframe.contentWindow.print(); }
+    if (iframe) { try { iframe.contentWindow.focus(); iframe.contentWindow.print(); } catch(e) { window.open(url, '_blank'); } }
+    else { window.open(url, '_blank'); }
   }
 }
 
 function downloadDoc() {
-  if (!currentDocData || !currentDocMeta) return;
-  const a = document.createElement('a');
-  a.href = currentDocData;
-  a.download = currentDocMeta.name;
-  a.click();
-  showToast('<i class="fa-solid fa-download"></i> Downloading ' + currentDocMeta.name);
+  if (!currentDocMeta) return;
+  downloadDirect(currentDocId, currentDocMeta.name);
 }
 
 // =============================================
@@ -1004,12 +1160,12 @@ function showToast(msg) {
   toastTimer = setTimeout(() => t.style.display = 'none', 2800);
 }
 
-// Close modal on overlay click
+// =============================================
+// EVENT LISTENERS
+// =============================================
 document.getElementById('viewer-modal').addEventListener('click', function(e) {
   if (e.target === this) closeViewer();
 });
-
-// Keyboard shortcuts
 document.addEventListener('keydown', function(e) {
   if (!pdfDoc) return;
   if (e.key === 'ArrowRight' || e.key === 'ArrowDown') pdfNextPage();
@@ -1018,9 +1174,9 @@ document.addEventListener('keydown', function(e) {
 });
 
 // =============================================
-// INIT
+// BOOT
 // =============================================
-refreshHome();
+runLoadingSequence();
 </script>
 </body>
 </html>
