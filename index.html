@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Om's Docs - Retro Document System</title>
+    <!-- Font Awesome 6 (Free icons, retro compatible, used as 'react native style icons') -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ===== OMHACKZ RETRO SYSTEM ===== */
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Verdana", "Tahoma", sans-serif;
+            background-color: #f4f4f4;
+            color: #000;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Main Container */
+        .container {
+            width: 960px;
+            max-width: 95%;
+            margin: 20px auto;
+            border: 1px solid #000;
+            padding: 10px;
+            background-color: #fff;
+            box-shadow: 5px 5px 0px rgba(0,0,0,0.1);
+        }
+
+        /* Header */
+        .site-header {
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+        }
+
+        .site-header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .header-icons i {
+            font-size: 20px;
+            margin-left: 8px;
+            color: #000080;
+        }
+
+        /* Navigation */
+        .site-nav {
+            margin: 10px 0;
+            padding: 5px 0;
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
+            text-align: center;
+        }
+
+        .site-nav a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #000080;
+            font-weight: 500;
+        }
+
+        .site-nav a i {
+            margin-right: 5px;
+        }
+
+        .site-nav a:hover {
+            text-decoration: underline;
+            background-color: #e8e8e8;
+        }
+
+        /* Sections / Pages */
+        .section, .page {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background: #fefefe;
+        }
+
+        h1 { font-size: 24px; margin-bottom: 10px; }
+        h2 { font-size: 20px; margin-bottom: 10px; color: #000080; border-left: 5px solid #000080; padding-left: 10px; }
+        h3 { font-size: 16px; margin: 10px 0;}
+
+        /* Tables */
+        .documents-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .documents-table th,
+        .documents-table td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .documents-table th {
+            background-color: #e0e0e0;
+            font-weight: bold;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px;
+            border: 1px solid #000;
+            background-color: #e0e0e0;
+            color: #000;
+            text-decoration: none;
+            font-size: 13px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+
+        .btn i {
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            background-color: #d0d0d0;
+            border-color: #000;
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
+        /* empty state */
+        .empty-message {
+            padding: 20px;
+            text-align: center;
+            background: #faf0e6;
+            border: 1px dashed #000;
+        }
+
+        /* modal (popup) retro style */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-container {
+            background: #fff;
+            border: 3px solid #000;
+            width: 85%;
+            max-width: 900px;
+            height: 80%;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 8px 8px 0px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: #e0e0e0;
+            padding: 10px;
+            border-bottom: 2px solid #000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .modal-header .close-btn {
+            background: none;
+            border: 1px solid #000;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0 6px;
+        }
+
+        .modal-body {
+            flex: 1;
+            padding: 12px;
+            overflow: auto;
+            background: #f4f4f4;
+        }
+
+        .modal-actions {
+            padding: 10px;
+            border-top: 2px solid #000;
+            background: #e0e0e0;
+            display: flex;
+            gap: 12px;
+        }
+
+        iframe.document-frame {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #aaa;
+            background: white;
+        }
+
+        /* upload form (hidden from navigation) but exists */
+        .upload-form {
+            margin-top: 10px;
+        }
+        .upload-form input, .upload-form button {
+            margin-top: 8px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .status-msg {
+            margin-top: 12px;
+            padding: 6px;
+            background: #ffffd0;
+            border-left: 4px solid #000080;
+        }
+
+        /* Footer */
+        .site-footer {
+            text-align: center;
+            font-size: 12px;
+            padding: 10px 0;
+            border-top: 2px solid #000;
+            color: #555;
+            margin-top: 20px;
+        }
+
+        /* hide modern junk */
+        .mobile-menu-toggle,
+        .hero-art,
+        .brand-avatar,
+        .brand-mark,
+        .grid,
+        .cards,
+        .card,
+        .code-card,
+        .cta-band,
+        .socials {
+            display: none !important;
+        }
+
+        /* responsive */
+        @media (max-width: 700px) {
+            .container { width: 98%; }
+            .documents-table th, .documents-table td { padding: 5px; }
+            .btn { font-size: 11px; padding: 3px 6px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- Using React + ReactDOM + React Icons via CDN (react-icons/all) but we also use FontAwesome for retro but meets "react native icons" requirement via fa6? But we use both: react-icons for authenticity -->
+    <!-- We'll implement fully with React, ReactDOM, and react-icons library (esm) -->
+    <script src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+    <!-- React Icons (all icons) via ESM -->
+    <script type="importmap">
+        {
+            "imports": {
+                "react-icons/fa": "https://esm.sh/react-icons@5.0.1/fa",
+                "react-icons/md": "https://esm.sh/react-icons@5.0.1/md",
+                "react-icons/io5": "https://esm.sh/react-icons@5.0.1/io5"
+            }
+        }
+    </script>
+    <script type="importmap">
+        {
+            "imports": {
+                "react": "https://esm.sh/react@18.2.0",
+                "react-dom/client": "https://esm.sh/react-dom@18.2.0/client"
+            }
+        }
+    </script>
+
+    <script type="text/babel" data-type="module">
+        // Main React App - Om's Docs - Multi page, retro, hidden upload, popup viewer, Vercel Blob storage via API
+        const { useState, useEffect } = React;
+        import { createRoot } from 'react-dom/client';
+        import { FaFileAlt, FaEye, FaDownload, FaPrint, FaUpload, FaHome, FaInfoCircle, FaFilePdf, FaFileWord, FaTimes } from 'react-icons/fa';
+        import { MdDescription } from 'react-icons/md';
+        import { IoDocumentTextOutline } from 'react-icons/io5';
+
+        // API Endpoints (relative)
+        const API_FILES = '/api/files';
+        const API_UPLOAD = '/api/upload';
+
+        // Helper: format file size
+        function formatBytes(bytes) {
+            if (!bytes) return 'Unknown';
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        // Document Viewer Modal (popup) with Print & Download buttons
+        function DocumentViewerModal({ file, onClose }) {
+            const [viewUrl, setViewUrl] = useState('');
+            
+            useEffect(() => {
+                if (!file) return;
+                // For PDFs we can directly embed the blob url, for Word/other docs use Google Docs Viewer
+                const fileUrl = file.url;
+                const ext = file.name.split('.').pop().toLowerCase();
+                if (ext === 'pdf') {
+                    setViewUrl(fileUrl);
+                } else if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'].includes(ext)) {
+                    // Use Google Docs viewer for better preview
+                    const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}&embedded=true`;
+                    setViewUrl(viewerUrl);
+                } else {
+                    // fallback: just show link or raw
+                    setViewUrl(fileUrl);
+                }
+            }, [file]);
+
+            const handlePrint = () => {
+                // Open document in new window and trigger print dialog
+                if (file && file.url) {
+                    const printWindow = window.open(file.url, '_blank');
+                    if (printWindow) {
+                        printWindow.onload = () => {
+                            printWindow.print();
+                        };
+                    } else {
+                        alert('Popup blocked. Please allow popups for print.');
+                    }
+                }
+            };
+
+            const handleDownload = () => {
+                if (file && file.url) {
+                    const a = document.createElement('a');
+                    a.href = file.url;
+                    a.download = file.name;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
+            };
+
+            if (!file) return null;
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3><IoDocumentTextOutline style={{marginRight: '6px'}} /> {file.name}</h3>
+                            <button className="close-btn btn-sm" onClick={onClose}><FaTimes /></button>
+                        </div>
+                        <div className="modal-body">
+                            {viewUrl ? (
+                                <iframe 
+                                    className="document-frame" 
+                                    src={viewUrl} 
+                                    title={file.name}
+                                    sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"
+                                ></iframe>
+                            ) : (
+                                <div className="empty-message">Loading preview...</div>
+                            )}
+                        </div>
+                        <div className="modal-actions">
+                            <button className="btn" onClick={handlePrint}><FaPrint /> Print</button>
+                            <button className="btn" onClick={handleDownload}><FaDownload /> Download</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Layout Component (retro header + nav)
+        function Layout({ children, currentPage }) {
+            return (
+                <div className="container">
+                    <div className="site-header">
+                        <h1><span style={{background: '#000', color: '#fff', padding: '2px 6px'}}>OM'S</span> DOCS</h1>
+                        <div className="header-icons">
+                            <i className="fas fa-floppy-disk"></i>
+                            <i className="fas fa-terminal"></i>
+                        </div>
+                    </div>
+                    <div className="site-nav">
+                        <a href="/" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/'); window.dispatchEvent(new PopStateEvent('popstate')); }}>
+                            <FaHome /> HOME
+                        </a>
+                        <a href="/about" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/about'); window.dispatchEvent(new PopStateEvent('popstate')); }}>
+                            <FaInfoCircle /> ABOUT
+                        </a>
+                        {/* NO UPLOAD LINK — hidden route, only manual typing */}
+                    </div>
+                    <div className="page">
+                        {children}
+                    </div>
+                    <div className="site-footer">
+                        <span>⚙️ RETRO SYSTEM v1.0 | OM'S DOCS ARCHIVE</span>
+                    </div>
+                </div>
+            );
+        }
+
+        // Home Page: list documents, view popup, download etc.
+        function HomePage({ files, loading, onViewDocument }) {
+            return (
+                <>
+                    <h2><i className="fas fa-folder-open"></i> DOCUMENT REPOSITORY</h2>
+                    {loading && <div className="empty-message"><i className="fas fa-spinner fa-pulse"></i> Loading documents...</div>}
+                    {!loading && files.length === 0 && (
+                        <div className="empty-message">
+                            <MdDescription size={24} /> No documents available. System ready.
+                        </div>
+                    )}
+                    {!loading && files.length > 0 && (
+                        <table className="documents-table">
+                            <thead>
+                                <tr>
+                                    <th><FaFileAlt /> Filename</th>
+                                    <th>Size</th>
+                                    <th>Type</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {files.map((file) => {
+                                    const ext = file.name.split('.').pop().toLowerCase();
+                                    const isPdf = ext === 'pdf';
+                                    const isWord = ['doc', 'docx'].includes(ext);
+                                    let icon = <FaFileAlt />;
+                                    if (isPdf) icon = <FaFilePdf />;
+                                    else if (isWord) icon = <FaFileWord />;
+                                    else icon = <MdDescription />;
+                                    return (
+                                        <tr key={file.id}>
+                                            <td>{icon} {file.name}</td>
+                                            <td>{formatBytes(file.size)}</td>
+                                            <td>{ext.toUpperCase() || 'DOC'}</td>
+                                            <td>
+                                                <button className="btn btn-sm" onClick={() => onViewDocument(file)} style={{marginRight: '6px'}}>
+                                                    <FaEye /> View
+                                                </button>
+                                                <a className="btn btn-sm" href={file.url} download={file.name} style={{textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px'}}>
+                                                    <FaDownload /> Get
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    )}
+                </>
+            );
+        }
+
+        // About Page (retro)
+        function AboutPage() {
+            return (
+                <>
+                    <h2><FaInfoCircle /> ABOUT OM'S ARCHIVE</h2>
+                    <div className="section">
+                        <p><strong>Om's Docs</strong> — A classic document library system inspired by old-school BBS and early web portals. All files are securely stored via Vercel Blob storage (no database). This system provides a lightweight, searchable index of your digital documents.</p>
+                        <p>📄 Supported formats: PDF, DOC, DOCX, TXT, and more. Use the integrated popup viewer with print & download functions.</p>
+                        <p><i className="fas fa-database"></i> Storage: serverless blob store | <i className="fas fa-laptop-code"></i> Retro UI · 2025</p>
+                        <hr />
+                        <p><small>Access restricted areas? This is the public archive. No external upload prompts — only system operators can manage content via secure endpoint.</small></p>
+                    </div>
+                </>
+            );
+        }
+
+        // Upload Page (Hidden from navigation, accessible only by /upload) — no mention in UI anywhere else.
+        function UploadPage({ onUploadSuccess }) {
+            const [file, setFile] = useState(null);
+            const [uploading, setUploading] = useState(false);
+            const [message, setMessage] = useState('');
+
+            const handleUpload = async (e) => {
+                e.preventDefault();
+                if (!file) {
+                    setMessage('Select a file first');
+                    return;
+                }
+                const formData = new FormData();
+                formData.append('document', file);
+                setUploading(true);
+                setMessage('Uploading...');
+                try {
+                    const res = await fetch(API_UPLOAD, {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        setMessage(`✅ Uploaded: ${data.file.name}`);
+                        setFile(null);
+                        if (onUploadSuccess) onUploadSuccess();
+                        // reset file input
+                        document.getElementById('fileInput').value = '';
+                    } else {
+                        setMessage(`❌ Error: ${data.error || 'Upload failed'}`);
+                    }
+                } catch (err) {
+                    setMessage(`❌ Network error: ${err.message}`);
+                } finally {
+                    setUploading(false);
+                }
+            };
+
+            return (
+                <div>
+                    <h2><FaUpload /> SYSTEM CONSOLE [RESTRICTED]</h2>
+                    <div className="section" style={{border: '2px solid #a00'}}>
+                        <p><strong>⚠️ ADMINISTRATOR ZONE</strong> — Use to add documents to the archive.</p>
+                        <form onSubmit={handleUpload} className="upload-form">
+                            <div className="form-group">
+                                <label>Select document (PDF, Word, etc): </label>
+                                <input 
+                                    type="file" 
+                                    id="fileInput"
+                                    accept=".pdf,.doc,.docx,.txt,.rtf,.odt"
+                                    onChange={(e) => setFile(e.target.files[0])}
+                                    style={{marginTop: '5px', border: '1px solid #000', padding: '4px'}}
+                                />
+                            </div>
+                            <button type="submit" className="btn" disabled={uploading}>
+                                {uploading ? <i className="fas fa-spinner fa-pulse"></i> : <FaUpload />} 
+                                {uploading ? ' PROCESSING...' : ' UPLOAD TO ARCHIVE'}
+                            </button>
+                        </form>
+                        {message && <div className="status-msg">{message}</div>}
+                        <p style={{fontSize: '12px', marginTop: '12px', color: '#444'}}>📁 Files are stored securely on Vercel Blob. No database required.</p>
+                    </div>
+                </div>
+            );
+        }
+
+        // Main App Router (SPA style multi-page)
+        function App() {
+            const [currentRoute, setCurrentRoute] = useState(window.location.pathname);
+            const [documents, setDocuments] = useState([]);
+            const [loadingDocs, setLoadingDocs] = useState(true);
+            const [selectedFile, setSelectedFile] = useState(null); // for modal
+
+            // Fetch files from API (stored in Vercel Blob JSON)
+            const fetchDocuments = async () => {
+                setLoadingDocs(true);
+                try {
+                    const res = await fetch(API_FILES);
+                    const data = await res.json();
+                    if (res.ok && data.files) {
+                        setDocuments(data.files);
+                    } else {
+                        setDocuments([]);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    setDocuments([]);
+                } finally {
+                    setLoadingDocs(false);
+                }
+            };
+
+            useEffect(() => {
+                fetchDocuments();
+                const handlePopState = () => {
+                    setCurrentRoute(window.location.pathname);
+                };
+                window.addEventListener('popstate', handlePopState);
+                return () => window.removeEventListener('popstate', handlePopState);
+            }, []);
+
+            // after upload refresh list
+            const handleUploadSuccess = () => {
+                fetchDocuments();
+            };
+
+            const navigate = (path) => {
+                window.history.pushState({}, '', path);
+                setCurrentRoute(path);
+            };
+
+            // route handler
+            let content;
+            if (currentRoute === '/about') {
+                content = <AboutPage />;
+            } else if (currentRoute === '/upload') {
+                // hidden page, not linked, but functional.
+                content = <UploadPage onUploadSuccess={handleUploadSuccess} />;
+            } else {
+                // home page / and others default
+                content = <HomePage files={documents} loading={loadingDocs} onViewDocument={(file) => setSelectedFile(file)} />;
+            }
+
+            return (
+                <Layout currentPage={currentRoute}>
+                    {content}
+                    {selectedFile && (
+                        <DocumentViewerModal 
+                            file={selectedFile} 
+                            onClose={() => setSelectedFile(null)} 
+                        />
+                    )}
+                </Layout>
+            );
+        }
+
+        // Render app
+        const rootEl = document.getElementById('root');
+        const root = createRoot(rootEl);
+        root.render(<App />);
+    </script>
+    <!-- Add Babel for JSX transformation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel" data-type="module">
+        // ensure babel handles the above module, but already defined. Just for safety we re-run? no.
+        console.log('Om\'s Docs - Retro System Active');
+    </script>
+    <!-- Backend API simulation note: For Vercel deployment, we need serverless functions (API routes) that actually handle uploads and blob storage. 
+         This frontend expects /api/upload and /api/files to work. Since the requirement demands a full site working on Vercel without DB, we must provide Node.js serverless functions. 
+         The above HTML/JS is the client. But to meet the spec 'store the data on vercel without any database', I also provide the API implementation (Next.js style or Vercel Functions). 
+         However this answer requires a self-contained project. Since the user asked to "Create a multi page site named Om's Docs" and gave CSS, I deliver interactive UI with React and the expected API endpoints handlers in a separate code block? I will include full Node.js serverless functions using @vercel/blob. 
+         But the HTML above is static but requires those endpoints. To make this fully functional on Vercel, I must provide the API routes. Since the chat output is the final answer, I'll embed serverless functions code description? The context expects HTML/CSS/JS but also the ability to store data. I have to combine a full working solution with API endpoints. Because the answer is being generated as final and the environment is a single output, I will additionally include inline explanation to create api routes. But the best is to output a full project structure with /api files and static index. Since this is a code generation, I'll provide final answer with both client side (above) and serverless functions code (Node.js) in the same response but clearly indicating file structure. Due to chat limit, I'll also produce a summary that the user can deploy to Vercel with the following files. 
+         To ensure completeness, I'll output a "Vercel Deployment Ready" folder structure with the index.html and api routes. But I've already built a fully functional client-side that calls /api/upload and /api/files. The next step is to provide the actual API routes using @vercel/blob. 
+         Therefore I'll append API code as additional text for the user to create in /api directory. 
+    -->
+</body>
+</html>
